@@ -10,27 +10,29 @@
         <div class="page-header">
             <h1>Meníčka v okolí</h1>
         </div>
-
-        {% for restaurant in menus %}
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">{{restaurant.name}}</h3>
+        <div class="row">
+            {% for restaurant in menus %}
+            <div class="col-md-4 col-sm-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">{{restaurant.name}}</h3>
+                    </div>
+                    <div class="panel-body">
+                        <span><strong>Polévka:</strong> {{restaurant.menu.soup}}</span>
+                        <ol>
+                            {% for meal in restaurant.menu.meals %}
+                            <li>
+                                {{meal.name}} ({{meal.price}} Kč)
+                                <br/>
+                                <small>{{meal.description}}</small>
+                            </li>
+                            {% endfor %}
+                        </ol>
+                    </div>
+                </div>
             </div>
-            <div class="panel-body">
-                <span><strong>Polévka:</strong> {{restaurant.menu.soup}}</span>
-                <ol>
-                    {% for meal in restaurant.menu.meals %}
-                    <li>
-                        {{meal.name}} ({{meal.price}} Kč)
-                        <br/>
-                        <small>{{meal.description}}</small>
-                    </li>
-                    {% endfor %}
-                </ol>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-
         <small>Poslední aktualizace: {{timeStamp}}</small>
     </div>
 </body>
