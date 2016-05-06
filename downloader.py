@@ -1,3 +1,4 @@
+import re
 import datetime
 from bs4 import BeautifulSoup
 import urllib.request
@@ -158,8 +159,88 @@ class KralovskaCesta(DownloaderBase):
         }
 
 
+class Yvy(DownloaderBase):
+    def __init__(self):
+        super(Yvy, self).__init__()
+
+    def getName(self):
+        return "YVY"
+
+    def getUrl(self):
+        return "http://www.yvy.cz/denni-menu/"
+
+    def getWeekMenuContent(self, soup):
+        return soup.findAll("tbody")[0]
+
+    def getTodayMenu(self, weekSoup, weekDay):
+        items = weekSoup.findAll("tr")
+        startIndex = weekDay * 8 + 2
+
+        soupName = items[startIndex].findAll("td")[1].text
+        r = range(startIndex + 1, startIndex + 6)
+        meals = [items[i].findAll("td")[1].text for i in r]
+        prices = [int(items[i].findAll("td")[3].text[:-2]) for i in r]
+
+        return {
+            "soup": soupName,
+            "meals": [{
+                "name": m[0],
+                "description": "",
+                "price": m[1]
+            } for m in zip(meals, prices)]
+        }
+
+
+class LaBotte(DownloaderBase):
+    def __init__(self):
+        super(LaBotte, self).__init__()
+
+    def getName(self):
+        return "la Botte"
+
+    def getUrl(self):
+        return "https://www.zomato.com/cs/brno/pizzeria-la-botte-kr%C3%A1lovo-pole-brno-sever"
+
+    def getWeekMenuContent(self, soup):
+        return soup.findAll("div", {"class": "tmi-group"})[0]
+
+    def removeAlergens(self, input):
+        input = re.sub(r'A-(\d+,*)+', '', input)
+        return input.strip()
+
+    def getTodayMenu(self, weekSoup, weekday):
+        soupName = weekSoup.find("div", {"class": "tmi-name"}).string
+        soupName = soupName.strip()[9:]
+        soupName = self.removeAlergens(soupName)
+
+        meals = []
+        items = weekSoup.findAll("div", {"class": "tmi-daily"})
+        for i in items[1:]:
+            if "hidden" in i["class"]:
+                continue
+
+            meal = i.find("div", {"class": "tmi-name"}).string.strip()[8:]
+            meal = self.removeAlergens(meal)
+
+            price = int(i.find("div", {"class": "tmi-price"}).string.strip()[:-3])
+            meals.append((meal, price))
+
+        return {
+            "soup": soupName,
+            "meals": [{
+                "name": m[0],
+                "description": "",
+                "price": m[1]
+            } for m in meals]
+        }
+
+
 def getMenus():
-    restaurants = [KlubCestovatelu(), Racek(), KralovskaCesta()]
+    restaurants = [KlubCestovatelu(),
+                   Racek(),
+                   KralovskaCesta(),
+                   Yvy(),
+                   LaBotte()]
     return[{"name": r.getName(), "menu": r.pipe()} for r in restaurants]
 
 if __name__ == '__main__':
