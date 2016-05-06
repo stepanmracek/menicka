@@ -41,6 +41,9 @@ class DownloaderBase(object):
     def getTodayMenuContent(self, weekSoup, weekDay):
         raise "Abstract method called"
 
+    def getLogo(self):
+        return ""
+
     def getWeekDay(self):
         return datetime.datetime.now().weekday()
 
@@ -82,6 +85,9 @@ class KlubCestovatelu(DownloaderBase):
                 "price": 99
             }]
         }
+
+    def getLogo(self):
+        return "klub_cestovatelu.png"
 
 
 class Racek(DownloaderBase):
@@ -126,6 +132,9 @@ class Racek(DownloaderBase):
             }]
         }
 
+    def getLogo(self):
+        return "racek.png"
+
 
 class KralovskaCesta(DownloaderBase):
     def __init__(self):
@@ -158,6 +167,9 @@ class KralovskaCesta(DownloaderBase):
             } for m in zip(meals, prices)]
         }
 
+    def getLogo(self):
+        return "kralovska_cesta.png"
+
 
 class Yvy(DownloaderBase):
     def __init__(self):
@@ -189,6 +201,9 @@ class Yvy(DownloaderBase):
                 "price": m[1]
             } for m in zip(meals, prices)]
         }
+
+    def getLogo(self):
+        return "yvy.png"
 
 
 class LaBotte(DownloaderBase):
@@ -234,6 +249,9 @@ class LaBotte(DownloaderBase):
             } for m in meals]
         }
 
+    def getLogo(self):
+        return "la_botte.png"
+
 
 def getMenus():
     restaurants = [KlubCestovatelu(),
@@ -241,7 +259,11 @@ def getMenus():
                    KralovskaCesta(),
                    Yvy(),
                    LaBotte()]
-    return[{"name": r.getName(), "menu": r.pipe()} for r in restaurants]
+    return[{"name": r.getName(),
+            "url": r.getUrl(),
+            "logo": r.getLogo(),
+            "menu": r.pipe()
+            } for r in restaurants]
 
 if __name__ == '__main__':
     print(getMenus())
