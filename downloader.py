@@ -108,9 +108,9 @@ class Racek(DownloaderBase):
         items = weekSoup.findAll("tr")
         startIndex = 5 + weekDay * 9
 
-        soupName = items[startIndex].findAll("td")[1].strong.string
+        soupName = items[startIndex].findAll("td")[1].text
         mealIndicies = [startIndex + i for i in range(2, 6)]
-        meals = [items[i].findAll("td")[1].strong.string for i in mealIndicies]
+        meals = [items[i].findAll("td")[1].text for i in mealIndicies]
 
         return {
             "soup": soupName,
