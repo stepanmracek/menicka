@@ -59,15 +59,16 @@ class KlubCestovatelu(DownloaderBase):
         return "http://www.hedvabnastezka.cz/klub-cestovatelu-brno/poledni-menu-2/"
 
     def getWeekMenuContent(self, soup):
-        return soup.findAll("div", {"class": "article-content"})[0]
+        return soup.find("div", {"class": "article-content"})
 
     def getTodayMenu(self, weekSoup, weekDay):
-        today = weekSoup.findAll("p")[weekDay]
-        items = today.findAll("strong")
+        startIndex = 4 + weekDay * 6
+        items = weekSoup.findAll("p")[startIndex:startIndex + 6]
 
         soupName = items[1].string[0] + items[1].string[1:].lower()
-        meals = [items[i].string[3:] for i in range(2, 5)]
-        mealDescriptions = [items[i].next_sibling[2:] for i in range(2, 5)]
+        print(soupName)
+        meals = [items[i].find("strong").string[3:] for i in range(2, 5)]
+        mealDescriptions = [items[i].find("strong").next_sibling[2:] for i in range(2, 5)]
 
         return {
             "soup": soupName,
