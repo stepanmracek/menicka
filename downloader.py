@@ -11,11 +11,17 @@ class DownloaderBase(object):
         super(DownloaderBase, self).__init__()
 
     def pipe(self):
-        downloadContent = self.download()
-        soup = self.parse(downloadContent)
-        weekSoup = self.getWeekMenuContent(soup)
-        menu = self.getTodayMenu(weekSoup, self.getWeekDay())
-        return menu
+        try:
+            downloadContent = self.download()
+            soup = self.parse(downloadContent)
+            weekSoup = self.getWeekMenuContent(soup)
+            menu = self.getTodayMenu(weekSoup, self.getWeekDay())
+            return menu
+        except:
+            return {
+                "soup": "",
+                "meals": []
+            }
 
     def download(self):
         agent = 'Mozilla/5.0 (X11; Linux x86_64; rv:46.0) Gecko/20100101 Firefox/46.0'
