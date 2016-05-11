@@ -72,9 +72,8 @@ class KlubCestovatelu(DownloaderBase):
         items = weekSoup.findAll("p")[startIndex:startIndex + 6]
 
         soupName = items[1].string[0] + items[1].string[1:].lower()
-        print(soupName)
-        meals = [items[i].find("strong").string[3:] for i in range(2, 5)]
-        mealDescriptions = [items[i].find("strong").next_sibling[2:] for i in range(2, 5)]
+        meals = [items[i].find("strong").text[3:] for i in range(2, 5)]
+        mealDescriptions = [items[i].find("strong").next_sibling.string for i in range(2, 5)]
 
         return {
             "soup": soupName,
