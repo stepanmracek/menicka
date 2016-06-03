@@ -1,7 +1,22 @@
+#! /usr/bin/env python3
+
 import re
 import datetime
 from bs4 import BeautifulSoup
 import urllib.request
+
+
+def dayNumberToName(number):
+    dayNames = {
+        0: "pondělí",
+        1: "úterý",
+        2: "středa",
+        3: "čtvrtek",
+        4: "pátek",
+        5: "sobota",
+        6: "neděle"
+    }
+    return dayNames[number]
 
 
 class DownloaderBase(object):
@@ -11,13 +26,13 @@ class DownloaderBase(object):
         super(DownloaderBase, self).__init__()
 
     def pipe(self):
-        try:
+        #try:
             downloadContent = self.download()
             soup = self.parse(downloadContent)
             weekSoup = self.getWeekMenuContent(soup)
             menu = self.getTodayMenu(weekSoup, self.getWeekDay())
             return menu
-        except:
+        #except:
             return {
                 "soup": "",
                 "meals": []
@@ -68,9 +83,16 @@ class KlubCestovatelu(DownloaderBase):
         return soup.find("div", {"class": "article-content"})
 
     def getTodayMenu(self, weekSoup, weekDay):
-        startIndex = 4 + weekDay * 6
-        items = weekSoup.findAll("p")[startIndex:startIndex + 6]
+        items = weekSoup.findAll("p")
+        startIndex = -1
+        for i in range(len(items)):
+            if dayNumberToName(weekDay) in items[i].text.lower():
+                startIndex = i
 
+        if startIndex == -1:
+            raise "menu data for given day %d not available" % weekDay
+
+        items = items[startIndex:]
         soupName = items[1].string[0] + items[1].string[1:].lower()
         meals = [items[i].find("strong").text[3:] for i in range(2, 5)]
         mealDescriptions = [items[i].find("strong").next_sibling.string for i in range(2, 5)]
@@ -111,11 +133,18 @@ class Racek(DownloaderBase):
 
     def getTodayMenu(self, weekSoup, weekDay):
         items = weekSoup.findAll("tr")
-        startIndex = 5 + weekDay * 9
 
-        soupName = items[startIndex].findAll("td")[1].text
-        mealIndicies = [startIndex + i for i in range(2, 6)]
-        meals = [items[i].findAll("td")[1].text for i in mealIndicies]
+        startIndex = -1
+        for i in range(len(items)):
+            if dayNumberToName(weekDay) in items[i].findAll("td")[1].text.lower():
+                startIndex = i
+
+        if startIndex == -1:
+            raise "menu data for given day %d not available" % weekDay
+
+        items = items[startIndex:]
+        soupName = items[2].findAll("td")[1].text
+        meals = [items[i].findAll("td")[1].text for i in range(4, 8)]
 
         return {
             "soup": soupName,
@@ -264,7 +293,8 @@ def getMenus():
                    Racek(),
                    KralovskaCesta(),
                    Yvy(),
-                   LaBotte()]
+                   #LaBotte()
+                   ]
     return[{"name": r.getName(),
             "url": r.getUrl(),
             "logo": r.getLogo(),
